@@ -1,7 +1,6 @@
-// ChangePassword.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
+import './Theme.css';
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -29,42 +28,43 @@ function ChangePassword() {
   };
 
   return (
-    <div className="admin-wrapper">
-      <h2 className="admin-title">🔐 Change Password</h2>
-      <div className="password-form">
-        <form onSubmit={handleSubmit}>
-          <input
-            type="password"
-            placeholder="Old Password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Confirm New Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <button type="submit" className="button-primary">Save Password</button>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate(-1)}
-          >
-            🔙 Back
-          </button>
-        </form>
-        {message && <p className="password-message">{message}</p>}
-      </div>
+    <div className="glass-card">
+      <h2>🔐 Change Password</h2>
+      <form className="password-form" onSubmit={handleSubmit}>
+        <input
+          className="glass-input"
+          type="password"
+          placeholder="Old Password"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          required
+        />
+        <input
+          className="glass-input"
+          type="password"
+          placeholder="New Password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <input
+          className="glass-input"
+          type="password"
+          placeholder="Confirm New Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        <button type="submit" className="glass-button">Save Password</button>
+        <button
+          type="button"
+          className="glass-button"
+          onClick={() => navigate(-1)}
+        >
+          🔙 Back
+        </button>
+      </form>
+      {message && <p className="password-message">{message}</p>}
     </div>
   );
 }

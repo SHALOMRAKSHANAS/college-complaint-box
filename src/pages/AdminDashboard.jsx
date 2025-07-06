@@ -1,4 +1,3 @@
-// AdminDashboard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -16,9 +15,15 @@ function AdminDashboard() {
   const [showStarredOnly, setShowStarredOnly] = useState(false);
   const audioRef = useRef(null);
 
+  const fetchComplaints = () => {
+    fetch('http://localhost:5000/complaints')
+      .then(res => res.json())
+      .then(data => setComplaints(data))
+      .catch(() => setComplaints([]));
+  };
+
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('complaints') || '[]');
-    setComplaints(stored);
+    fetchComplaints();
   }, []);
 
   const playSound = () => {
@@ -34,37 +39,48 @@ function AdminDashboard() {
 
   const handleClearComplaints = () => {
     if (window.confirm('Are you sure you want to clear all complaints?')) {
-      localStorage.removeItem('complaints');
-      setComplaints([]);
-      notify('All complaints cleared!');
+      fetch('http://localhost:5000/clear', { method: 'POST' })
+        .then(() => {
+          fetchComplaints();
+          notify('All complaints cleared!');
+        });
     }
   };
 
-  const toggleStar = (id) => {
-    const updated = complaints.map(c =>
-      c.id === id ? { ...c, starred: !c.starred } : c
-    );
-    setComplaints(updated);
-    localStorage.setItem('complaints', JSON.stringify(updated));
-    notify('Star status updated!');
+  const toggleStar = (id, currentStarred) => {
+    fetch(`http://localhost:5000/complaints/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ starred: !currentStarred })
+    })
+    .then(() => {
+      fetchComplaints();
+      notify('Star status updated!');
+    });
   };
 
   const handleDeleteComplaint = (id) => {
     if (window.confirm('Delete this complaint?')) {
-      const updated = complaints.filter(c => c.id !== id);
-      setComplaints(updated);
-      localStorage.setItem('complaints', JSON.stringify(updated));
-      notify('Complaint deleted!');
+      fetch(`http://localhost:5000/complaints/${id}`, {
+        method: 'DELETE'
+      })
+      .then(() => {
+        fetchComplaints();
+        notify('Complaint deleted!');
+      });
     }
   };
 
   const handleStatusChange = (id, newStatus) => {
-    const updated = complaints.map(c =>
-      c.id === id ? { ...c, status: newStatus } : c
-    );
-    setComplaints(updated);
-    localStorage.setItem('complaints', JSON.stringify(updated));
-    notify(`Status changed to ${newStatus}`);
+    fetch(`http://localhost:5000/complaints/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    })
+    .then(() => {
+      fetchComplaints();
+      notify(`Status changed to ${newStatus}`);
+    });
   };
 
   const handleDownloadPDF = () => {
@@ -162,10 +178,7 @@ function AdminDashboard() {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
+        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
           <option value="">All Categories</option>
           <option value="Hostel">Hostel</option>
           <option value="WiFi">WiFi</option>
@@ -173,10 +186,7 @@ function AdminDashboard() {
           <option value="Academics">Academics</option>
           <option value="Other">Other</option>
         </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
           <option value="">All Statuses</option>
           <option value="Open">Open</option>
           <option value="In Progress">In Progress</option>
@@ -222,7 +232,7 @@ function AdminDashboard() {
               <div className="complaint-actions">
                 <button
                   className={`star-button ${complaint.starred ? 'starred' : ''}`}
-                  onClick={() => toggleStar(complaint.id)}
+                  onClick={() => toggleStar(complaint.id, complaint.starred)}
                 >
                   {complaint.starred ? '⭐' : '☆'}
                 </button>

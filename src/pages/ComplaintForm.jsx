@@ -22,7 +22,7 @@ function ComplaintForm() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setErrorMsg('');
 
     if (!text.trim() || !category) {
@@ -35,21 +35,23 @@ function ComplaintForm() {
       return;
     }
 
-    const existing = JSON.parse(localStorage.getItem('complaints') || '[]');
+    try {
+      const response = await fetch('http://localhost:5000/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, category })
+      });
 
-    const newComplaint = {
-      id: Date.now(),
-      text,
-      category,
-      timestamp: new Date().toISOString(),
-      starred: false,
-    };
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
 
-    existing.push(newComplaint);
-    localStorage.setItem('complaints', JSON.stringify(existing));
+      alert('✅ Your complaint was submitted anonymously!');
+      navigate('/');
 
-    alert('✅ Your complaint was submitted anonymously!');
-    navigate('/');
+    } catch (error) {
+      setErrorMsg('❌ Server error. Please try again later.');
+    }
   };
 
   return (
