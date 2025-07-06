@@ -1,0 +1,29 @@
+.complaint-form {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+  
+  .complaint-form textarea {
+    resize: vertical;
+    min-height: 100px;
+    padding: 10px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  .complaint-form label {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+  
+  .complaint-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .complaint-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
