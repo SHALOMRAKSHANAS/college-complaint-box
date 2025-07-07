@@ -15,6 +15,7 @@ function AdminDashboard() {
   const [showStarredOnly, setShowStarredOnly] = useState(false);
   const audioRef = useRef(null);
 
+  // ✅ Fetch complaints from server
   const fetchComplaints = () => {
     fetch('http://localhost:5000/complaints')
       .then(res => res.json())
@@ -26,17 +27,24 @@ function AdminDashboard() {
     fetchComplaints();
   }, []);
 
+  // ✅ Play sound
   const playSound = () => {
     if (audioRef.current) {
-      audioRef.current.play();
+      audioRef.current.currentTime = 0;
+      audioRef.current.volume = 1.0;
+      audioRef.current.play().catch((err) => {
+        console.error('Audio playback blocked or failed:', err);
+      });
     }
   };
 
+  // ✅ Notification with sound
   const notify = (message) => {
     toast.success(message);
     playSound();
   };
 
+  // ✅ Clear all complaints
   const handleClearComplaints = () => {
     if (window.confirm('Are you sure you want to clear all complaints?')) {
       fetch('http://localhost:5000/clear', { method: 'POST' })
@@ -47,6 +55,7 @@ function AdminDashboard() {
     }
   };
 
+  // ✅ Star/Unstar
   const toggleStar = (id, currentStarred) => {
     fetch(`http://localhost:5000/complaints/${id}`, {
       method: 'PUT',
@@ -59,18 +68,18 @@ function AdminDashboard() {
     });
   };
 
+  // ✅ Delete
   const handleDeleteComplaint = (id) => {
     if (window.confirm('Delete this complaint?')) {
-      fetch(`http://localhost:5000/complaints/${id}`, {
-        method: 'DELETE'
-      })
-      .then(() => {
-        fetchComplaints();
-        notify('Complaint deleted!');
-      });
+      fetch(`http://localhost:5000/complaints/${id}`, { method: 'DELETE' })
+        .then(() => {
+          fetchComplaints();
+          notify('Complaint deleted!');
+        });
     }
   };
 
+  // ✅ Status change
   const handleStatusChange = (id, newStatus) => {
     fetch(`http://localhost:5000/complaints/${id}`, {
       method: 'PUT',
@@ -83,6 +92,7 @@ function AdminDashboard() {
     });
   };
 
+  // ✅ PDF Download
   const handleDownloadPDF = () => {
     if (filteredComplaints.length === 0) {
       alert('No complaints to download.');
@@ -117,6 +127,7 @@ function AdminDashboard() {
     doc.save('complaints_report.pdf');
   };
 
+  // ✅ Filtered complaints
   const filteredComplaints = complaints.filter((c) => {
     const matchesText = c.text.toLowerCase().includes(searchText.toLowerCase());
     const matchesCategory = !filterCategory || c.category === filterCategory;
@@ -125,7 +136,7 @@ function AdminDashboard() {
     return matchesText && matchesCategory && matchesStatus && matchesStarred;
   });
 
-  // Chart Data
+  // ✅ Charts data
   const categoryCounts = complaints.reduce((acc, curr) => {
     acc[curr.category] = (acc[curr.category] || 0) + 1;
     return acc;
@@ -143,41 +154,28 @@ function AdminDashboard() {
     { name: 'Starred', value: complaints.filter(c => c.starred).length },
     { name: 'Unstarred', value: complaints.filter(c => !c.starred).length },
   ];
-
   const COLORS = ['#FFD700', '#8884d8'];
 
   return (
     <div className="admin-wrapper">
+      {/* ✅ Audio in public/ folder */}
       <audio ref={audioRef} src="/notify.mp3" preload="auto" />
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
 
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
       <h2 className="admin-title">📋 Admin Dashboard</h2>
 
       <div className="admin-top-buttons">
-        <button className="button-secondary" onClick={() => navigate('/change-password')}>
-          🔐 Change Password
-        </button>
-        <button className="button-secondary" onClick={() => navigate('/')}>
-          🔙 Logout
-        </button>
+        <button className="button-secondary" onClick={() => navigate('/change-password')}>🔐 Change Password</button>
+        <button className="button-secondary" onClick={() => navigate('/')}>🔙 Logout</button>
       </div>
 
       <div className="admin-buttons">
-        <button className="button-primary" onClick={handleClearComplaints}>
-          🗑️ Clear All Complaints
-        </button>
-        <button className="button-primary" onClick={handleDownloadPDF}>
-          📥 Download PDF
-        </button>
+        <button className="button-primary" onClick={handleClearComplaints}>🗑️ Clear All Complaints</button>
+        <button className="button-primary" onClick={handleDownloadPDF}>📥 Download PDF</button>
       </div>
 
       <div className="admin-filters">
-        <input
-          type="text"
-          placeholder="🔎 Search text..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
+        <input type="text" placeholder="🔎 Search text..." value={searchText} onChange={(e) => setSearchText(e.target.value)} />
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
           <option value="">All Categories</option>
           <option value="Hostel">Hostel</option>
@@ -193,11 +191,7 @@ function AdminDashboard() {
           <option value="Resolved">Resolved</option>
         </select>
         <label>
-          <input
-            type="checkbox"
-            checked={showStarredOnly}
-            onChange={() => setShowStarredOnly(!showStarredOnly)}
-          />
+          <input type="checkbox" checked={showStarredOnly} onChange={() => setShowStarredOnly(!showStarredOnly)} />
           Show only ⭐
         </label>
       </div>
@@ -216,32 +210,19 @@ function AdminDashboard() {
                 <span className="complaint-category">📌 {complaint.category}</span>
                 <span className="complaint-status">
                   🏷️ Status:
-                  <select
-                    value={complaint.status || 'Open'}
-                    onChange={(e) => handleStatusChange(complaint.id, e.target.value)}
-                  >
+                  <select value={complaint.status || 'Open'} onChange={(e) => handleStatusChange(complaint.id, e.target.value)}>
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                   </select>
                 </span>
-                <span className="complaint-date">
-                  🕒 {new Date(complaint.timestamp).toLocaleString()}
-                </span>
+                <span className="complaint-date">🕒 {new Date(complaint.timestamp).toLocaleString()}</span>
               </div>
               <div className="complaint-actions">
-                <button
-                  className={`star-button ${complaint.starred ? 'starred' : ''}`}
-                  onClick={() => toggleStar(complaint.id, complaint.starred)}
-                >
+                <button className={`star-button ${complaint.starred ? 'starred' : ''}`} onClick={() => toggleStar(complaint.id, complaint.starred)}>
                   {complaint.starred ? '⭐' : '☆'}
                 </button>
-                <button
-                  className="delete-button"
-                  onClick={() => handleDeleteComplaint(complaint.id)}
-                >
-                  🗑️
-                </button>
+                <button className="delete-button" onClick={() => handleDeleteComplaint(complaint.id)}>🗑️</button>
               </div>
             </li>
           ))}
