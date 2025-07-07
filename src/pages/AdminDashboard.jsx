@@ -17,7 +17,7 @@ function AdminDashboard() {
 
   // ✅ Fetch complaints from server
   const fetchComplaints = () => {
-    fetch('http://localhost:5000/complaints')
+    fetch('https://chat.lokihere.me/complaints')
       .then(res => res.json())
       .then(data => setComplaints(data))
       .catch(() => setComplaints([]));
@@ -47,7 +47,7 @@ function AdminDashboard() {
   // ✅ Clear all complaints
   const handleClearComplaints = () => {
     if (window.confirm('Are you sure you want to clear all complaints?')) {
-      fetch('http://localhost:5000/clear', { method: 'POST' })
+      fetch('https://chat.lokihere.me/clear', { method: 'POST' })
         .then(() => {
           fetchComplaints();
           notify('All complaints cleared!');
@@ -57,7 +57,7 @@ function AdminDashboard() {
 
   // ✅ Star/Unstar
   const toggleStar = (id, currentStarred) => {
-    fetch(`http://localhost:5000/complaints/${id}`, {
+    fetch(`https://chat.lokihere.me/complaints/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !currentStarred })
@@ -71,7 +71,7 @@ function AdminDashboard() {
   // ✅ Delete
   const handleDeleteComplaint = (id) => {
     if (window.confirm('Delete this complaint?')) {
-      fetch(`http://localhost:5000/complaints/${id}`, { method: 'DELETE' })
+      fetch(`https://chat.lokihere.me/complaints/${id}`, { method: 'DELETE' })
         .then(() => {
           fetchComplaints();
           notify('Complaint deleted!');
@@ -81,7 +81,7 @@ function AdminDashboard() {
 
   // ✅ Status change
   const handleStatusChange = (id, newStatus) => {
-    fetch(`http://localhost:5000/complaints/${id}`, {
+    fetch(`https://chat.lokihere.me/complaints/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
